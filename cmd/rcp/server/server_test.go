@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	bytes2 "bytes"
-	"fileServer/pkg/rpc"
+	"fileServer/pkg/rcp"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -23,25 +23,25 @@ func Test_DownloadInServerOk(t *testing.T) {
 			t.Fatalf("can't start server: %v", err)
 		}
 	}()
-	time.Sleep(rpc.TimeSleep)
-	conn, err := net.Dial(rpc.Tcp, addr)
+	time.Sleep(rcp.TimeSleep)
+	conn, err := net.Dial(rcp.Tcp, addr)
 	if err != nil {
 		t.Fatalf("can't connect to server: %v", err)
 	}
 	writer := bufio.NewWriter(conn)
 	options := "test.txt"
-	line := rpc.DownLoad + ":" + options
-	err = rpc.WriteLine(line, writer)
+	line := rcp.DownLoad + ":" + options
+	err = rcp.WriteLine(line, writer)
 	if err != nil {
 		t.Fatalf("can't send command %s to server: %v", line, err)
 	}
 	reader := bufio.NewReader(conn)
-	line, err = rpc.ReadLine(reader)
-	src, err := ioutil.ReadFile("testdata/test.txt")
+	line, err = rcp.ReadLine(reader)
+	src, err := ioutil.ReadFile( rcp.PathTestData + "test.txt")
 	if err != nil {
 		log.Fatalf("Can't read file: %v",err)
 	}
-	dst, err := ioutil.ReadFile("files/test.txt")
+	dst, err := ioutil.ReadFile(rcp.PathFileServer + options)
 	if err != nil {
 			log.Fatalf("can't Read file: %v",err)
 	}
@@ -60,19 +60,19 @@ func Test_UploadToServerOk(t *testing.T) {
 			t.Fatalf("can't start server: %v", err)
 		}
 	}()
-	time.Sleep(rpc.TimeSleep)
-	conn, err := net.Dial(rpc.Tcp, addr)
+	time.Sleep(rcp.TimeSleep)
+	conn, err := net.Dial(rcp.Tcp, addr)
 	if err != nil {
 		t.Fatalf("can't connect to server: %v", err)
 	}
 	writer := bufio.NewWriter(conn)
 	options := "test.txt"
-	line := rpc.Upload + ":" + options
-	err = rpc.WriteLine(line, writer)
+	line := rcp.Upload + ":" + options
+	err = rcp.WriteLine(line, writer)
 	if err != nil {
 		t.Fatalf("can't send command %s to server: %v", line, err)
 	}
-	src, err := ioutil.ReadFile("testdata/test.txt")
+	src, err := ioutil.ReadFile(rcp.PathTestData + "test.txt")
 	if err != nil {
 		log.Fatalf("Can't read file: %v",err)
 	}
@@ -88,7 +88,7 @@ func Test_UploadToServerOk(t *testing.T) {
 	if err != nil {
 		log.Fatalf("Can't close conn: %v", err)
 	}
-	dst, err := ioutil.ReadFile("files/test.txt")
+	dst, err := ioutil.ReadFile(rcp.PathFileServer + "test.txt")
 	if err != nil {
 		log.Fatalf("can't Read file: %v",err)
 	}
@@ -107,20 +107,20 @@ func Test_ListInServerOk(t *testing.T)  {
 			t.Fatalf("can't start server: %v", err)
 		}
 	}()
-	time.Sleep(rpc.TimeSleep)
-	conn, err := net.Dial(rpc.Tcp, addr)
+	time.Sleep(rcp.TimeSleep)
+	conn, err := net.Dial(rcp.Tcp, addr)
 	if err != nil {
 		t.Fatalf("can't connect to server: %v", err)
 	}
 	writer := bufio.NewWriter(conn)
 	options := ""
-	line := rpc.List + ":" + options
-	err = rpc.WriteLine(line, writer)
+	line := rcp.List + ":" + options
+	err = rcp.WriteLine(line, writer)
 	if err != nil {
 		t.Fatalf("can't send command %s to server: %v", line, err)
 	}
 	reader := bufio.NewReader(conn)
-	line, err = rpc.ReadLine(reader)
+	line, err = rcp.ReadLine(reader)
 	if line != "index.html test.txt\n" {
 		t.Fatalf("result not ok: %s %v", line, err)
 	}

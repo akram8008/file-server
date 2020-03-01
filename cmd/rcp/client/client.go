@@ -2,7 +2,7 @@ package main
 
 import (
 	"bufio"
-	"fileServer/pkg/rpc"
+	"fileServer/pkg/rcp"
 	"flag"
 	"fmt"
 	"io"
@@ -33,12 +33,12 @@ func main() {
 	var cmd, fileName string
 	if *download != "default" {
 		fileName = *download
-		cmd = rpc.DownLoad
+		cmd = rcp.DownLoad
 	} else if *upload != "default" {
-		cmd = rpc.Upload
+		cmd = rcp.Upload
 		fileName = *upload
 	} else if *list != false {
-		cmd = rpc.List
+		cmd = rcp.List
 		fileName = ""
 	} else{
 		return}
@@ -47,9 +47,9 @@ func main() {
 
 func StartingOperationsLoop(cmd string, fileName string)  {
 	log.Print("client connecting")
-	conn, err := net.Dial(rpc.Tcp, rpc.AddressClient)
+	conn, err := net.Dial(rcp.Tcp, rcp.AddressClient)
 	if err != nil {
-		log.Fatalf("can't connect to %s: %v", rpc.AddressClient, err)
+		log.Fatalf("can't connect to %s: %v", rcp.AddressClient, err)
 	}
 	defer func() {
 		err := conn.Close()
@@ -61,17 +61,17 @@ func StartingOperationsLoop(cmd string, fileName string)  {
 	writer := bufio.NewWriter(conn)
 	line := cmd + ":" + fileName
 	log.Print("command sending")
-	err = rpc.WriteLine(line, writer)
+	err = rcp.WriteLine(line, writer)
 	if err != nil {
 		log.Fatalf("can't send command %s to server: %v", line, err)
 	}
 	log.Print("command sent")
 	switch cmd {
-	case rpc.DownLoad:
+	case rcp.DownLoad:
 		downloadFromServer(conn, fileName)
-	case rpc.Upload:
+	case rcp.Upload:
 		uploadInServer(conn, fileName)
-	case rpc.List:
+	case rcp.List:
 		listFile(conn)
 	default:
 		fmt.Printf("Вы выбрали неверную команду: %s\n", cmd)
@@ -81,12 +81,12 @@ func StartingOperationsLoop(cmd string, fileName string)  {
 
 func downloadFromServer(conn net.Conn, fileName string) {
 	reader := bufio.NewReader(conn)
-	line, err := rpc.ReadLine(reader)
+	line, err := rcp.ReadLine(reader)
 	if err != nil {
 		log.Printf("can't read: %v", err)
 		return
 	}
-	if line == rpc.ForError + rpc.Endl {
+	if line == rcp.ForError + rcp.Endl {
 		log.Printf("file not such: %v", err)
 		fmt.Printf("Файл с название %s на сервере не существует\n", fileName)
 		return
@@ -99,7 +99,7 @@ func downloadFromServer(conn net.Conn, fileName string) {
 		}
 	}
 	log.Print(len(bytes))
-	err = ioutil.WriteFile(rpc.PathFileClient + fileName, bytes, 0666)
+	err = ioutil.WriteFile(rcp.PathFileClient + fileName, bytes, 0666)
 	if err != nil {
 		log.Printf("can't write file: %v", err)
 	}
@@ -107,16 +107,16 @@ func downloadFromServer(conn net.Conn, fileName string) {
 }
 
 func uploadInServer(conn net.Conn, fileName string) {
-	options := strings.TrimSuffix(fileName, rpc.Endl)
-	file, err := os.Open(rpc.PathFileClient + options)
+	options := strings.TrimSuffix(fileName, rcp.Endl)
+	file, err := os.Open(rcp.PathFileClient + options)
 	writer := bufio.NewWriter(conn)
 	if err != nil {
 		log.Print("file does not exist")
-		err = rpc.WriteLine(rpc.ForError, writer)
+		err = rcp.WriteLine(rcp.ForError, writer)
 		fmt.Printf("Файл с название %s не существует\n", fileName)
 		return
 	}
-	err = rpc.WriteLine(rpc.CheckOk, writer)
+	err = rcp.WriteLine(rcp.CheckOk, writer)
 	if err != nil {
 		log.Printf("error while writing: %v", err)
 		return
@@ -134,7 +134,7 @@ func uploadInServer(conn net.Conn, fileName string) {
 
 func listFile(conn net.Conn) {
 	reader := bufio.NewReader(conn)
-	line, err := rpc.ReadLine(reader)
+	line, err := rcp.ReadLine(reader)
 	if err != nil {
 		log.Printf("can't read: %v", err)
 		return

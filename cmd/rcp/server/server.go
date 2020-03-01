@@ -2,7 +2,7 @@ package main
 
 import (
 	"bufio"
-	"fileServer/pkg/rpc"
+	"fileServer/pkg/rcp"
 	"io"
 	"io/ioutil"
 	"log"
@@ -38,7 +38,7 @@ func main()  {
 
 func start(addr string) (err error) {
 
-	listener, err := net.Listen(rpc.Tcp, addr)
+	listener, err := net.Listen(rcp.Tcp, addr)
 	if err != nil {
 		log.Fatalf("can't listen %s: %v", addr, err)
 		return err
@@ -68,7 +68,7 @@ func handleConn(conn net.Conn) {
 		}
 	}()
 	reader := bufio.NewReader(conn)
-	line, err := rpc.ReadLine(reader)
+	line, err := rcp.ReadLine(reader)
 	if err != nil {
 		log.Fatalf("error while reading: %v", err)
 		return
@@ -77,7 +77,7 @@ func handleConn(conn net.Conn) {
 	writer := bufio.NewWriter(conn)
 	if index == -1 {
 		log.Printf("invalid line received %s", line)
-		err := rpc.WriteLine("error: invalid line", writer)
+		err := rcp.WriteLine("error: invalid line", writer)
 		if err != nil {
 			log.Printf("error while writing: %v", err)
 			return
@@ -88,14 +88,14 @@ func handleConn(conn net.Conn) {
 	log.Printf("command received: %s", cmd)
 	log.Printf("options received: %s", options)
 	switch cmd {
-	case rpc.Upload:
+	case rcp.Upload:
 		uploadFromBuffer (options, reader, writer)
-	case rpc.DownLoad:
+	case rcp.DownLoad:
 		downloadToBuffer (options, reader, writer)
-	case rpc.List:
+	case rcp.List:
 		listFileToBuffer (options, reader, writer)
 	default:
-		err := rpc.WriteLine(rpc.ForError, writer)
+		err := rcp.WriteLine(rcp.ForError, writer)
 		if err != nil {
 			log.Printf("error while writing: %v", err)
 			return
@@ -104,13 +104,13 @@ func handleConn(conn net.Conn) {
 }
 
 func uploadFromBuffer (options string, reader *bufio.Reader, writer *bufio.Writer){
-	options = strings.TrimSuffix(options, rpc.Endl)
-	line, err := rpc.ReadLine(reader)
+	options = strings.TrimSuffix(options, rcp.Endl)
+	line, err := rcp.ReadLine(reader)
 	if err != nil {
 		log.Printf("can't read: %v", err)
 		return
 	}
-	if line == rpc.ForError + rpc.Endl {
+	if line == rcp.ForError + rcp.Endl {
 		log.Printf("file not such: %v", err)
 		return
 	}
@@ -121,12 +121,12 @@ func uploadFromBuffer (options string, reader *bufio.Reader, writer *bufio.Write
 			return
 		}
 	}
-	err = ioutil.WriteFile(rpc.PathFileServer+options, bytes, 0666)
+	err = ioutil.WriteFile(rcp.PathFileServer+options, bytes, 0666)
 	if err != nil {
 		log.Printf("can't write file: %v", err)
 		return
 	}
-	err = rpc.WriteLine(rpc.CheckOk, writer)
+	err = rcp.WriteLine(rcp.CheckOk, writer)
 	if err != nil {
 		log.Printf("error while writing: %v", err)
 		return
@@ -134,15 +134,15 @@ func uploadFromBuffer (options string, reader *bufio.Reader, writer *bufio.Write
 }
 
 func downloadToBuffer (options string, reader *bufio.Reader, writer *bufio.Writer) {
-	options = strings.TrimSuffix(options, rpc.Endl)
-	file, err := os.Open(rpc.PathFileServer + options)
+	options = strings.TrimSuffix(options, rcp.Endl)
+	file, err := os.Open(rcp.PathFileServer + options)
 
 	if err != nil {
-		log.Printf("file does not exist %v ",rpc.PathFileServer + options)
-		err = rpc.WriteLine(rpc.ForError, writer)
+		log.Printf("file does not exist %v ", rcp.PathFileServer + options)
+		err = rcp.WriteLine(rcp.ForError, writer)
 		return
 	}
-	err = rpc.WriteLine(rpc.CheckOk, writer)
+	err = rcp.WriteLine(rcp.CheckOk, writer)
 	if err != nil {
 		log.Printf("error while writing: %v", err)
 		return
@@ -156,9 +156,9 @@ func downloadToBuffer (options string, reader *bufio.Reader, writer *bufio.Write
 }
 
 func listFileToBuffer (options string, reader *bufio.Reader, writer *bufio.Writer) {
-	options = strings.TrimSuffix(options, rpc.Endl)
-	fileName := rpc.ReadDir(rpc.PathFileServer)
-	err := rpc.WriteLine(fileName, writer)
+	options = strings.TrimSuffix(options, rcp.Endl)
+	fileName := rcp.ReadDir(rcp.PathFileServer)
+	err := rcp.WriteLine(fileName, writer)
 	if err != nil {
 		log.Printf("error while writing: %v", err)
 	}
