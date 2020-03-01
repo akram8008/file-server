@@ -37,11 +37,11 @@ func Test_DownloadInServerOk(t *testing.T) {
 	}
 	reader := bufio.NewReader(conn)
 	line, err = rcp.ReadLine(reader)
-	src, err := ioutil.ReadFile( rcp.PathTestData + "test.txt")
+	src, err := ioutil.ReadFile( "testdata/test.txt")
 	if err != nil {
 		log.Fatalf("Can't read file: %v",err)
 	}
-	dst, err := ioutil.ReadFile(rcp.PathFileServer + options)
+	dst, err := ioutil.ReadFile("files/" + options)
 	if err != nil {
 			log.Fatalf("can't Read file: %v",err)
 	}
@@ -72,7 +72,7 @@ func Test_UploadToServerOk(t *testing.T) {
 	if err != nil {
 		t.Fatalf("can't send command %s to server: %v", line, err)
 	}
-	src, err := ioutil.ReadFile(rcp.PathTestData + "test.txt")
+	src, err := ioutil.ReadFile("testdata/test.txt")
 	if err != nil {
 		log.Fatalf("Can't read file: %v",err)
 	}
@@ -88,7 +88,7 @@ func Test_UploadToServerOk(t *testing.T) {
 	if err != nil {
 		log.Fatalf("Can't close conn: %v", err)
 	}
-	dst, err := ioutil.ReadFile(rcp.PathFileServer + "test.txt")
+	dst, err := ioutil.ReadFile("files/test.txt")
 	if err != nil {
 		log.Fatalf("can't Read file: %v",err)
 	}
