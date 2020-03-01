@@ -1,0 +1,4 @@
+.idea
+*.exe
+server-log.txt
+client-log.txt
